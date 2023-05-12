@@ -86,8 +86,7 @@ char* clave01(int len, const char* clave) {
     for (int i = 0; i < len; i++) {
         aaa[i] = clave[i % clave_len]; // Se utiliza el operador módulo (%) para obtener el índice de la clave correspondiente.
     }
-    aaa[len] = '\0'; // Se agrega el caracter nulo al final del vector.
-	printf("\n%s\n",aaa);
+ //  aaa[len] = '\0';  Se agrega el caracter nulo al final del vector.
     return aaa;
 }
 /*
@@ -104,32 +103,20 @@ void desencriptar(char *sms, char *numEncrip)
 {
 	int tam = strlen(sms);//ingresa el tamaño de sms
 	char a[tam];//crea vector para imprimir mensaje decodificado
-	for (int i = 0; i<tam; i++){
-		printf("sms:%c,num:%c",sms[i],numEncrip[i]);
-		a[i]= sms[i] - numEncrip[i] + 48;//se restar caracteres con números, 48 valor numerico del caracter 0
-		printf("val.a:%c \n",a[i]);
-	}
-	printf ("El mensaje desencriptado es: %s\n",a);
-}
-/*
-funcion encargada de transformar el array del argumento en una string
-recibe:
-arr--> array de caracteres perteneciente a la clave numerica
-retorna:
-str--> la clave numerica transformada en string
-*/
-char* transString(char* arr)
-{
-    int length = strlen(arr);
-    char* str = (char*)malloc(length + 1); // reservar memoria para la cadena
-    int i;
-    for (i = 0; i < length; i++) {
-        str[i] = arr[i]; // copiar cada carácter del array en la cadena
+    for (int i = 0; i < tam; i++)
+    {
+		if((sms[i] - numEncrip[i]+ 48)<32)
+		{
+	        int bandera= 32 - (sms[i] - numEncrip[i]+ 48);
+	        a[i]=126-bandera;
+		}else{
+	        a[i]= sms[i] - numEncrip[i]+ 48 ; //se pueden sumar caracteres con números, 48 valor numerico del caracter 0
+		}
     }
-    str[length] = '\0'; // agregar el carácter nulo para indicar el final de la cadena
-    return str; // devolver la cadena
+    printf("El mensaje desencriptado queda:");
+    for (int j=0;j<strlen(sms);j++)
+    	printf("%c", a[j]);
 }
-
 /*
  * recibe la clave de encriptación y el mensaje a encriptar
  * va sumando cada caracter con su respectivo par numérico
@@ -153,13 +140,19 @@ void encriptar(char *sms, char *numEncrip)
     int tam = strlen(sms); //ingresa el tamaño de sms
     char a[tam]; //crea vector para imprimir mensaje codificado
 
-    for (int i = 0; i < tam; i++) {
-		printf("sms:%c,num:%c",sms[i],numEncrip[i]);
-        a[i]= sms[i] + numEncrip[i]- 48 ; //se pueden sumar caracteres con números, 48 valor numerico del caracter 0
-		printf("val.a:%c \n",a[i]);
+    for (int i = 0; i < tam; i++)
+    {
+		if((sms[i] + numEncrip[i]- 48)<32)
+		{
+	        int bandera= 32-(sms[i] + numEncrip[i]- 48);
+	        a[i]=126-bandera;
+		}else{
+	        a[i]= sms[i] + numEncrip[i]- 48 ; //se pueden sumar caracteres con números, 48 valor numerico del caracter 0
+		}
     }
-
-    printf("El mensaje encriptado queda: %s\n", a);
+    printf("El mensaje encriptado queda:");
+    for (int j=0;j<strlen(sms);j++)
+    	printf("%c", a[j]);
 }
 /*
  * el usuario va ingresando los datos necesarios mediante la consola
@@ -180,24 +173,35 @@ pasar la concatenacion de la clave numerica a encriptar
 int main(int argc, char **argv)
 {
 	char ayoyo[40];//cadena donde se cargaran los argumentos concatenados
-	if (verNum(argv[2])==1) return 0; //verifica si la clave consta de unicamente numeros, de lo contrario termina el programa
-	for (int N=3;N<argc;N++)
+	if(argv[1][0]=='-')
 	{
-		strcat(ayoyo,argv[N]);
-		if ((N+1)!=argc)
-			strcat(ayoyo," ");
-	}
-	int tamCad=contarChar(strlen(ayoyo));
-	char *wololo=clave01(tamCad,argv[2]);
-	if (*argv[1]=='c')// si argv[1] es c, ejecuta la funcion de encriptar
-		encriptar(ayoyo, wololo);
-	else if (*argv[1]=='d')// si argv[1] es d, ejecuta la funcion de desencriptar
-		desencriptar(ayoyo, wololo);
-	else//si el usuario ingresa cualquier otro caracter se avisa el error y termina el programa
-	{
-		printf("Opción inválida\n");
+		if(argv[1][1]=='c' || argv[1][1]=='d')
+		{
+			if (verNum(argv[2])==1) return 0; //verifica si la clave consta de unicamente numeros, de lo contrario termina el programa
+			for (int N=3;N<argc;N++)
+			{
+				strcat(ayoyo,argv[N]);
+				if ((N+1)!=argc)
+					strcat(ayoyo," ");
+			}
+			int tamCad=contarChar(strlen(ayoyo));
+			char *wololo=clave01(tamCad,argv[2]);
+			if (argv[1][1]=='c')// si argv[1] es c, ejecuta la funcion de encriptar
+				encriptar(ayoyo, wololo);
+			else if (argv[1][1]=='d')// si argv[1] es d, ejecuta la funcion de desencriptar
+				desencriptar(ayoyo, wololo);
+			else//si el usuario ingresa cualquier otro caracter se avisa el error y termina el programa
+			{
+				printf("Opción inválida\n");
+				return 0;
+			}
+			return 0;
+		}else{
+			printf("valor incorrecto");
+			return 0;
+		}
+	}else{
+		printf("valor incorrecto");
 		return 0;
 	}
-
-	return 0;
 }
